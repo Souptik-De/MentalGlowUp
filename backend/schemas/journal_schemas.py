@@ -1,19 +1,19 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Any
 
 class EmotionItem(BaseModel):
     label: str
     score: float
 
-class MoodEntryIn(BaseModel):
+class EntryIn(BaseModel):
     user_id: str = Field(..., example="user_1")
     emoji: str = Field(..., example="Down")
-    text: Optional[str] = Field(None, example="I had a rough day...")
+    text: Optional[str] = Field(None)
     timestamp: Optional[datetime] = None
 
-class MoodEntryOut(BaseModel):
-    id: str
+class EntryOut(BaseModel):
+    id: Any
     user_id: str
     timestamp: datetime
     emoji: str
