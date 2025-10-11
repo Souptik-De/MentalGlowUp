@@ -6,7 +6,7 @@ from typing import Dict, List
 from transformers import pipeline
 import nltk
 from nltk.tokenize import sent_tokenize
-from database import get_db
+from database import db
 from schemas.journal import EntryIn, EntryOut, EmotionItem
 from config import EMOJI_MAP, ALPHA, WINDOW, POSITIVE_LABELS, NEGATIVE_LABELS
 
@@ -103,7 +103,7 @@ def dicts_to_emotion_items(dicts: List[Dict]) -> List[EmotionItem]:
     return [EmotionItem(**e) for e in dicts]
 
 async def create_mood_entry(payload: EntryIn) -> EntryOut:
-    db = get_db()
+    db = db()
     
     if payload.emoji not in EMOJI_MAP:
         raise HTTPException(status_code=400, detail="Unknown emoji label")
@@ -161,7 +161,7 @@ async def create_mood_entry(payload: EntryIn) -> EntryOut:
     return EntryOut(id=str(result.inserted_id), **doc, top_emotions=emotion_items)
 
 async def get_user_progress(user_id: str, limit: int):
-    db = get_db()
+    db = db()
     cursor = db.journals.find({"user_id": user_id}).sort("timestamp", 1).limit(limit)
     items = await cursor.to_list(length=limit)
     

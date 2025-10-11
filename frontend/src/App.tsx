@@ -7,6 +7,7 @@ import Home from "./pages/Home";
 import Breathe from "./pages/Breathe";
 import Progress from "./pages/Progress";
 import Journal from "./pages/Journal";
+import GoalsList from "./pages/GoalsList";
 import Goals from "./pages/Goals";
 import Quiz from "./pages/Quiz";
 import NotFound from "./pages/NotFound";
@@ -24,7 +25,8 @@ const App = () => (
           <Route path="/breathe" element={<Breathe />} />
           <Route path="/progress" element={<Progress />} />
           <Route path="/journal" element={<Journal />} />
-          <Route path="/goals" element={<Goals />} />
+          <Route path="/goals" element={<GoalsList />} />
+          <Route path="/goals/:id" element={<Goals />} />
           <Route path="/quiz" element={<Quiz />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
