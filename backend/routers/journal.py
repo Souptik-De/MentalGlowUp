@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from schemas.journal import EntryIn, EntryOut
+from schemas.journal_schemas import EntryIn, EntryOut
 from crud.journal_crud import create_mood_entry, get_user_progress
 
 router = APIRouter()
