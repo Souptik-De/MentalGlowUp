@@ -54,7 +54,7 @@ const MoodSelector = ({ onMoodSelected }: MoodSelectorProps) => {
         </p>
       </div>
 
-      <div className="grid grid-cols-3 md:grid-cols-5 gap-4 md:gap-6">
+      <div className="grid grid-cols-5 gap-3 md:gap-6">
         {moodOptions.map((mood) => (
           <button
             key={mood.id}
