@@ -4,7 +4,7 @@ const API_BASE = 'http://localhost:8000/api/v1';
 
 export const submitMoodEntry = async (entry: MoodEntry): Promise<ApiResponse> => {
   try {
-    const response = await fetch(`${API_BASE}/submit_entry`, {
+    const response = await fetch(`${API_BASE}/mood/submit`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
