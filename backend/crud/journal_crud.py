@@ -4,27 +4,72 @@ import numpy as np
 import asyncio
 from typing import Dict, List
 from transformers import pipeline
+import nltk
+from nltk.tokenize import sent_tokenize
 from database import get_db
-from schemas.journal_schemas import EntryIn, EntryOut, EmotionItem
+from schemas.journal import EntryIn, EntryOut, EmotionItem
 from config import EMOJI_MAP, ALPHA, WINDOW, POSITIVE_LABELS, NEGATIVE_LABELS
 
-# Model initialization
 MODEL_PIPELINE = None
+MAX_TOKENS = 512  # RoBERTa max input length
 
 async def init_emotion_model():
-    """Call this from main.py startup"""
     global MODEL_PIPELINE
+    nltk.download('punkt', quiet=True)
+    nltk.download('punkt_tab', quiet=True)
     MODEL_PIPELINE = pipeline("text-classification", model="SamLowe/roberta-base-go_emotions", top_k=None)
     await asyncio.to_thread(MODEL_PIPELINE, "warmup")
+    print("✓ Emotion model loaded")
+
+def chunk_text(text: str, max_length: int = 400) -> List[str]:
+    """Split text into chunks that fit model token limit"""
+    sentences = sent_tokenize(text)
+    chunks = []
+    current_chunk = []
+    current_length = 0
+    
+    for sent in sentences:
+        sent_length = len(sent.split())  # Rough token estimate
+        
+        if current_length + sent_length > max_length:
+            if current_chunk:
+                chunks.append(" ".join(current_chunk))
+            current_chunk = [sent]
+            current_length = sent_length
+        else:
+            current_chunk.append(sent)
+            current_length += sent_length
+    
+    if current_chunk:
+        chunks.append(" ".join(current_chunk))
+    
+    return chunks
 
 async def analyze_text(text: str) -> Dict[str, float]:
-    if MODEL_PIPELINE is None:
+    if MODEL_PIPELINE is None or not text:
         return {}
-    result = await asyncio.to_thread(MODEL_PIPELINE, text, top_k=None)
-    if isinstance(result, list) and result:
-        result = result[0] if isinstance(result[0], list) else result
-        return {p["label"]: float(p["score"]) for p in result}
-    return {}
+    
+    # Split into manageable chunks
+    chunks = chunk_text(text)
+    
+    # Analyze each chunk
+    all_scores = {}
+    for chunk in chunks:
+        result = await asyncio.to_thread(MODEL_PIPELINE, chunk, top_k=None)
+        
+        if isinstance(result, list) and result:
+            result = result[0] if isinstance(result[0], list) else result
+            chunk_scores = {p["label"]: float(p["score"]) for p in result}
+            
+            # Aggregate scores
+            for label, score in chunk_scores.items():
+                all_scores[label] = all_scores.get(label, 0) + score
+    
+    # Average scores across chunks
+    if chunks:
+        all_scores = {k: v / len(chunks) for k, v in all_scores.items()}
+    
+    return all_scores
 
 def compute_text_polarity(scores: Dict[str, float]) -> float:
     if not scores:
@@ -57,7 +102,6 @@ def emotion_items_to_dicts(emotions: List[EmotionItem]) -> List[Dict]:
 def dicts_to_emotion_items(dicts: List[Dict]) -> List[EmotionItem]:
     return [EmotionItem(**e) for e in dicts]
 
-# Main CRUD functions
 async def create_mood_entry(payload: EntryIn) -> EntryOut:
     db = get_db()
     
