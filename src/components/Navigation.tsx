@@ -2,7 +2,7 @@ import { Heart, Wind, TrendingUp, PenLine, Target, HelpCircle } from 'lucide-rea
 import { NavLink } from 'react-router-dom';
 
 const navItems = [
-  { to: '/', label: 'Breathe', icon: Wind },
+  { to: '/breathe', label: 'Breathe', icon: Wind },
   { to: '/progress', label: 'Progress', icon: TrendingUp },
   { to: '/journal', label: 'Journal', icon: PenLine, isCenter: true },
   { to: '/goals', label: 'Goals', icon: Target },
