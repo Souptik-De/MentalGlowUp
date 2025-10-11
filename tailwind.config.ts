@@ -57,6 +57,20 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        mood: {
+          amazing: "hsl(var(--mood-amazing))",
+          good: "hsl(var(--mood-good))",
+          okay: "hsl(var(--mood-okay))",
+          down: "hsl(var(--mood-down))",
+          stressed: "hsl(var(--mood-stressed))",
+        },
+      },
+      backgroundImage: {
+        'hero-gradient': 'var(--hero-gradient)',
+      },
+      boxShadow: {
+        'button-glow': 'var(--button-glow)',
+        'card-soft': 'var(--card-shadow)',
       },
       borderRadius: {
         lg: "var(--radius)",
