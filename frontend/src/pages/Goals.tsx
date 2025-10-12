@@ -1,65 +1,102 @@
-import Navigation from '@/components/Navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Target, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Goal } from "@/types/goal";
+import { api } from "@/services/api";
+import { GoalCard } from "@/components/GoalCard";
+import { CreateGoalDialog } from "@/components/CreateGoalDialog";
+import { Target, TrendingUp, Flame, Sparkles } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import Navigation from "@/components/Navigation";
 
 const Goals = () => {
+  const { data: goals, refetch } = useQuery<Goal[]>({
+    queryKey: ["goals"],
+    queryFn: api.getGoals,
+  });
+
+  const stats = {
+    total: goals?.length || 0,
+    active: goals?.filter(g => g.progress_percentage < 100).length || 0,
+    completed: goals?.filter(g => g.progress_percentage === 100).length || 0,
+    avgProgress: goals?.length
+      ? Math.round(goals.reduce((sum, g) => sum + g.progress_percentage, 0) / goals.length)
+      : 0,
+    totalStreak: goals?.reduce((sum, g) => sum + g.current_streak, 0) || 0,
+  };
+
   return (
     <div className="min-h-screen pb-24 md:pb-8 md:pt-16">
       <Navigation />
-      
-      <div className="container mx-auto px-4 md:px-6 py-8 md:py-12">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">Goals</h1>
-            <p className="text-muted-foreground text-lg">Set and track your wellness objectives</p>
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 gradient-bg opacity-60"></div>
+        <div className="relative container mx-auto px-4 py-12 md:py-20">
+          <div className="max-w-4xl mx-auto text-center space-y-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-4">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-primary">AI-Powered Goal Tracking</span>
+            </div>
+            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
+              Your Wellness Journey
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+              Track your goals with AI-generated insights and personalized action plans
+            </p>
+            <div className="pt-4">
+              <CreateGoalDialog onGoalCreated={() => refetch()} />
+            </div>
           </div>
+        </div>
+      </div>
 
-          <Card className="shadow-card-soft">
-            <CardHeader>
-              <CardTitle>Your Wellness Goals</CardTitle>
-              <CardDescription>Create goals to improve your mental health</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-96 flex flex-col items-center justify-center text-center">
-                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Target className="w-10 h-10 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">No goals yet</h3>
-                <p className="text-muted-foreground mb-6 max-w-md">
-                  Start setting wellness goals to track your progress and stay motivated on your journey
-                </p>
-                <Button size="lg" className="shadow-button-glow">
-                  <Plus className="w-5 h-5 mr-2" />
-                  Create Your First Goal
-                </Button>
-              </div>
-            </CardContent>
+      {/* Stats Section */}
+      <div className="container mx-auto px-4 -mt-8 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
+          <Card className="p-4 text-center shadow-soft border-border/50 bg-card/80 backdrop-blur-sm">
+            <Target className="h-8 w-8 mx-auto mb-2 text-primary" />
+            <div className="text-2xl font-bold">{stats.total}</div>
+            <div className="text-xs text-muted-foreground">Total Goals</div>
           </Card>
+          <Card className="p-4 text-center shadow-soft border-border/50 bg-card/80 backdrop-blur-sm">
+            <TrendingUp className="h-8 w-8 mx-auto mb-2 text-secondary" />
+            <div className="text-2xl font-bold">{stats.active}</div>
+            <div className="text-xs text-muted-foreground">Active</div>
+          </Card>
+          <Card className="p-4 text-center shadow-soft border-border/50 bg-card/80 backdrop-blur-sm">
+            <Sparkles className="h-8 w-8 mx-auto mb-2 text-accent" />
+            <div className="text-2xl font-bold">{stats.avgProgress}%</div>
+            <div className="text-xs text-muted-foreground">Avg Progress</div>
+          </Card>
+          <Card className="p-4 text-center shadow-soft border-border/50 bg-card/80 backdrop-blur-sm">
+            <Flame className="h-8 w-8 mx-auto mb-2 text-success" />
+            <div className="text-2xl font-bold">{stats.totalStreak}</div>
+            <div className="text-xs text-muted-foreground">Total Streak</div>
+          </Card>
+        </div>
+      </div>
 
-          {/* Suggested Goals */}
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {[
-              'Journal 3 times a week',
-              'Practice breathing exercises daily',
-              'Maintain a 7-day mood tracking streak',
-              'Complete a mental health quiz',
-            ].map((goal, index) => (
-              <Card key={index} className="shadow-card-soft hover:shadow-lg transition-shadow cursor-pointer">
-                <CardContent className="pt-6">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Target className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-foreground mb-1">{goal}</h4>
-                      <p className="text-sm text-muted-foreground">Suggested goal</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+      {/* Goals Grid */}
+      <div className="container mx-auto px-4 pb-20">
+        <div className="max-w-6xl mx-auto">
+          {!goals || goals.length === 0 ? (
+            <Card className="p-12 text-center shadow-soft">
+              <Target className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
+              <h3 className="text-xl font-semibold mb-2">No goals yet</h3>
+              <p className="text-muted-foreground mb-6">
+                Create your first goal to start your wellness journey
+              </p>
+              <CreateGoalDialog onGoalCreated={() => refetch()} />
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              <h2 className="text-2xl font-semibold mb-6">Your Goals</h2>
+              <div className="grid gap-6 md:grid-cols-2">
+                {goals.map((goal) => (
+                  <GoalCard key={goal._id} goal={goal} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -5,7 +5,6 @@ import BreathingCircle from '@/components/BreathingCircle';
 import BreathingControls from '@/components/BreathingControls';
 import BreathingSettings from '@/components/BreathingSettings';
 import PostBreathingMood from '@/components/PostBreathingMood';
-import { X } from 'lucide-react';
 
 export type BreathPhase = 'inhale' | 'hold-top' | 'exhale' | 'hold-bottom';
 
@@ -106,18 +105,9 @@ const Breathe = () => {
       
       <div className="container mx-auto px-4 md:px-6 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Box Breathing</h1>
-            <p className="text-muted-foreground mt-1">4-4-4-4 Technique</p>
-          </div>
-          <button
-            onClick={() => navigate('/')}
-            className="w-10 h-10 rounded-full bg-card hover:bg-muted transition-colors flex items-center justify-center shadow-card-soft"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5 text-muted-foreground" />
-          </button>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground">Box Breathing</h1>
+          <p className="text-muted-foreground mt-1">4-4-4-4 Technique</p>
         </div>
 
         {/* Breathing Circle */}

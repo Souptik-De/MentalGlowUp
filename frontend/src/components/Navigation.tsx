@@ -1,7 +1,8 @@
-import { Heart, Wind, TrendingUp, PenLine, Target, HelpCircle } from 'lucide-react';
+import { Heart, Wind, TrendingUp, PenLine, Target, HelpCircle, Home } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 const navItems = [
+  { to: '/', label: 'Home', icon: Home },
   { to: '/breathe', label: 'Breathe', icon: Wind },
   { to: '/progress', label: 'Progress', icon: TrendingUp },
   { to: '/journal', label: 'Journal', icon: PenLine, isCenter: true },
@@ -26,7 +27,7 @@ const Navigation = () => {
 
             {/* Nav Items */}
             <div className="flex items-center gap-8">
-              {navItems.filter(item => !item.isCenter).map((item) => (
+              {navItems.map((item) => (
                 <NavLink
                   key={item.to}
                   to={item.to}
@@ -45,10 +46,35 @@ const Navigation = () => {
         </div>
       </nav>
 
+      {/* Mobile Navigation - Top Bar with Home Button */}
+      <nav className="md:hidden fixed top-0 left-0 right-0 z-50 bg-card shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08)]">
+        <div className="flex items-center justify-between h-16 px-4">
+          {/* Logo */}
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+              <Heart className="w-4 h-4 text-primary-foreground" fill="currentColor" />
+            </div>
+            <span className="text-base sm:text-lg font-semibold text-foreground truncate">MindfulMe</span>
+          </div>
+
+          {/* Home Button */}
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              `flex items-center justify-center w-10 h-10 rounded-full transition-colors flex-shrink-0 ${
+                isActive ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+              }`
+            }
+          >
+            <Home className="w-5 h-5" />
+          </NavLink>
+        </div>
+      </nav>
+
       {/* Mobile Navigation - Bottom */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card shadow-[0_-4px_24px_-4px_rgba(0,0,0,0.08)]">
         <div className="flex items-center justify-around h-20 px-4">
-          {navItems.map((item) => (
+          {navItems.filter(item => item.to !== '/').map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

@@ -8,6 +8,7 @@ import Breathe from "./pages/Breathe";
 import Progress from "./pages/Progress";
 import Journal from "./pages/Journal";
 import Goals from "./pages/Goals";
+import GoalDetail from "./pages/GoalDetail";
 import Quiz from "./pages/Quiz";
 import NotFound from "./pages/NotFound";
 
@@ -19,16 +20,19 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/breathe" element={<Breathe />} />
-          <Route path="/progress" element={<Progress />} />
-          <Route path="/journal" element={<Journal />} />
-          <Route path="/goals" element={<Goals />} />
-          <Route path="/quiz" element={<Quiz />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <div className="pt-16 md:pt-0">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/breathe" element={<Breathe />} />
+            <Route path="/progress" element={<Progress />} />
+            <Route path="/journal" element={<Journal />} />
+            <Route path="/goals" element={<Goals />} />
+            <Route path="/goals/:id" element={<GoalDetail />} />
+            <Route path="/quiz" element={<Quiz />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
