@@ -1,14 +1,149 @@
+import { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Calendar, Heart, Zap } from 'lucide-react';
+import { api } from '@/services/api';
+
+// Helper function to calculate stats from progress data
+const calculateStats = (series: any[]) => {
+  if (!series || series.length === 0) {
+    return [
+      { label: 'Current Streak', value: '0 days', icon: Zap, color: 'text-mood-amazing' },
+      { label: 'Total Entries', value: '0', icon: Heart, color: 'text-mood-good' },
+      { label: 'This Month', value: '0', icon: Calendar, color: 'text-mood-okay' },
+      { label: 'Avg Mood', value: 'N/A', icon: TrendingUp, color: 'text-mood-good' },
+    ];
+  }
+
+  const totalEntries = series.length;
+
+  // Calculate current streak (consecutive days with entries)
+  let currentStreak = 0;
+  const today = new Date();
+  const todayStr = today.toDateString();
+
+  for (let i = series.length - 1; i >= 0; i--) {
+    const entryDate = new Date(series[i].timestamp);
+    const entryDateStr = entryDate.toDateString();
+
+    if (entryDateStr === todayStr ||
+        (i === series.length - 1 && Math.abs(today.getTime() - entryDate.getTime()) <= 24 * 60 * 60 * 1000)) {
+      currentStreak++;
+    } else {
+      break;
+    }
+  }
+
+  // Calculate this month's entries
+  const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const thisMonthEntries = series.filter(entry => new Date(entry.timestamp) >= thisMonth).length;
+
+  // Calculate average mood (weighted_mood average)
+  const avgMood = series.reduce((sum, entry) => sum + (entry.weighted_mood || 0), 0) / series.length;
+  const moodLabel = avgMood > 0.5 ? 'Amazing' : avgMood > 0 ? 'Good' : avgMood > -0.5 ? 'Okay' : 'Down';
+
+  return [
+    { label: 'Current Streak', value: `${currentStreak} days`, icon: Zap, color: 'text-mood-amazing' },
+    { label: 'Total Entries', value: totalEntries.toString(), icon: Heart, color: 'text-mood-good' },
+    { label: 'This Month', value: thisMonthEntries.toString(), icon: Calendar, color: 'text-mood-okay' },
+    { label: 'Avg Mood', value: moodLabel, icon: TrendingUp, color: 'text-mood-good' },
+  ];
+};
+
+// Helper function to calculate weekly mood counts
+const calculateWeeklyMoodCounts = (series: any[]) => {
+  if (!series || series.length === 0) {
+    return [
+      { mood: 'Amazing', count: 0, percentage: 0 },
+      { mood: 'Good', count: 0, percentage: 0 },
+      { mood: 'Okay', count: 0, percentage: 0 },
+      { mood: 'Down', count: 0, percentage: 0 },
+      { mood: 'Stressed', count: 0, percentage: 0 },
+    ];
+  }
+
+  // Get entries from the last 7 days
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+  const recentEntries = series.filter(entry => new Date(entry.timestamp) >= oneWeekAgo);
+
+  // Count moods
+  const moodCounts: { [key: string]: number } = {};
+  recentEntries.forEach(entry => {
+    const mood = entry.emoji || 'Okay';
+    moodCounts[mood] = (moodCounts[mood] || 0) + 1;
+  });
+
+  // Convert to array and calculate percentages
+  const total = recentEntries.length;
+  return Object.entries(moodCounts).map(([mood, count]) => ({
+    mood,
+    count,
+    percentage: total > 0 ? (count / total) * 100 : 0,
+  })).sort((a, b) => b.count - a.count);
+};
 
 const Progress = () => {
-  const stats = [
-    { label: 'Current Streak', value: '7 days', icon: Zap, color: 'text-mood-amazing' },
-    { label: 'Total Entries', value: '42', icon: Heart, color: 'text-mood-good' },
-    { label: 'This Month', value: '18', icon: Calendar, color: 'text-mood-okay' },
-    { label: 'Avg Mood', value: 'Good', icon: TrendingUp, color: 'text-mood-good' },
+  const [progressData, setProgressData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProgress = async () => {
+      try {
+        setLoading(true);
+        // For now, use a placeholder user_id - this should come from auth context
+        const data = await api.getUserProgress('user123');
+        setProgressData(data);
+      } catch (err) {
+        setError('Failed to load progress data');
+        console.error('Error fetching progress:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProgress();
+  }, []);
+
+  // Calculate stats from real data
+  const stats = progressData ? calculateStats(progressData.series) : [
+    { label: 'Current Streak', value: '0 days', icon: Zap, color: 'text-mood-amazing' },
+    { label: 'Total Entries', value: '0', icon: Heart, color: 'text-mood-good' },
+    { label: 'This Month', value: '0', icon: Calendar, color: 'text-mood-okay' },
+    { label: 'Avg Mood', value: 'N/A', icon: TrendingUp, color: 'text-mood-good' },
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pb-24 md:pb-8 md:pt-16">
+        <Navigation />
+        <div className="container mx-auto px-4 md:px-6 py-8 md:py-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center">
+              <p className="text-muted-foreground">Loading progress data...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen pb-24 md:pb-8 md:pt-16">
+        <Navigation />
+        <div className="container mx-auto px-4 md:px-6 py-8 md:py-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center">
+              <p className="text-destructive">{error}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pb-24 md:pb-8 md:pt-16">
@@ -61,7 +196,20 @@ const Progress = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {['Amazing', 'Good', 'Okay', 'Down', 'Stressed'].map((mood, index) => (
+                {progressData ? calculateWeeklyMoodCounts(progressData.series).map((item: any) => (
+                  <div key={item.mood} className="flex items-center justify-between">
+                    <span className="text-foreground">{item.mood}</span>
+                    <div className="flex-1 mx-4 bg-muted rounded-full h-2 overflow-hidden">
+                      <div
+                        className={`h-full bg-mood-${item.mood.toLowerCase()} transition-all`}
+                        style={{ width: `${item.percentage}%` }}
+                      />
+                    </div>
+                    <span className="text-muted-foreground text-sm w-12 text-right">
+                      {item.count}x
+                    </span>
+                  </div>
+                )) : ['Amazing', 'Good', 'Okay', 'Down', 'Stressed'].map((mood) => (
                   <div key={mood} className="flex items-center justify-between">
                     <span className="text-foreground">{mood}</span>
                     <div className="flex-1 mx-4 bg-muted rounded-full h-2 overflow-hidden">

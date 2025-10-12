@@ -103,8 +103,6 @@ def dicts_to_emotion_items(dicts: List[Dict]) -> List[EmotionItem]:
     return [EmotionItem(**e) for e in dicts]
 
 async def create_mood_entry(payload: EntryIn) -> EntryOut:
-    db = db()
-    
     if payload.emoji not in EMOJI_MAP:
         raise HTTPException(status_code=400, detail="Unknown emoji label")
 
@@ -149,7 +147,6 @@ async def create_mood_entry(payload: EntryIn) -> EntryOut:
         "emoji": payload.emoji,
         "emoji_score": emoji_score,
         "text": text,
-        "top_emotions": emotion_dicts,
         "text_polarity": text_polarity,
         "weighted_mood": weighted_mood,
         "z_score": z,
@@ -161,7 +158,6 @@ async def create_mood_entry(payload: EntryIn) -> EntryOut:
     return EntryOut(id=str(result.inserted_id), **doc, top_emotions=emotion_items)
 
 async def get_user_progress(user_id: str, limit: int):
-    db = db()
     cursor = db.journals.find({"user_id": user_id}).sort("timestamp", 1).limit(limit)
     items = await cursor.to_list(length=limit)
     
