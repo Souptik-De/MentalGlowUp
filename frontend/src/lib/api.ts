@@ -1,22 +1,9 @@
 import { MoodEntry, ApiResponse } from '@/types/mood';
-
-const API_BASE = 'http://localhost:8000/api/v1';
+import { api } from '@/services/api';
 
 export const submitMoodEntry = async (entry: MoodEntry): Promise<ApiResponse> => {
   try {
-    const response = await fetch(`${API_BASE}/mood/submit`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(entry),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const data = await api.submitMoodEntry(entry);
     return {
       success: true,
       data,

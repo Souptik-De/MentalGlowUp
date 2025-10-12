@@ -1,4 +1,5 @@
 import { Goal, CreateGoalRequest } from "@/types/goal";
+import { MoodEntry } from "@/types/mood";
 
 // Update this URL to your FastAPI backend URL
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -47,5 +48,22 @@ export const api = {
       method: "DELETE",
     });
     if (!response.ok) throw new Error("Failed to delete goal");
+  },
+
+  // Journal/Mood entry endpoints
+  async submitMoodEntry(entry: MoodEntry): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/submit_entry`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry),
+    });
+    if (!response.ok) throw new Error("Failed to submit mood entry");
+    return response.json();
+  },
+
+  async getUserProgress(userId: string, limit: number = 100): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/get_progress/${userId}?limit=${limit}`);
+    if (!response.ok) throw new Error("Failed to fetch user progress");
+    return response.json();
   },
 };
