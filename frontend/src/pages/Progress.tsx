@@ -104,6 +104,12 @@ const Progress = () => {
       }
     };
 
+    // Check if we need to refresh (e.g., after a journal entry)
+    const lastRefresh = sessionStorage.getItem('lastJournalEntry');
+    if (lastRefresh) {
+      sessionStorage.removeItem('lastJournalEntry'); // Clear the flag
+    }
+
     fetchProgress();
   }, []);
 

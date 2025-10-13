@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -6,12 +7,14 @@ import { Button } from '@/components/ui/button';
 import { submitMoodEntry } from '@/lib/api';
 import { toast } from 'sonner';
 import { MoodType } from '@/types/mood';
-import { Send, Sparkles } from 'lucide-react';
+import { Send, Sparkles, TrendingUp } from 'lucide-react';
 
 const Journal = () => {
   const [journalText, setJournalText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentMood, setCurrentMood] = useState<MoodType | null>(null);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const mood = sessionStorage.getItem('currentMood') as MoodType | null;
@@ -38,6 +41,9 @@ const Journal = () => {
       toast.success('Journal entry saved!');
       setJournalText('');
       sessionStorage.removeItem('currentMood');
+      // Set a flag to refresh the progress page
+      sessionStorage.setItem('lastJournalEntry', new Date().toISOString());
+      setShowSuccessMessage(true);
     } else {
       toast.error(result.message || 'Failed to save entry');
     }
@@ -90,6 +96,33 @@ const Journal = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Success Message */}
+          {showSuccessMessage && (
+            <Card className="shadow-card-soft mt-6 bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+              <CardContent className="pt-6">
+                <div className="text-center space-y-4">
+                  <div className="flex items-center justify-center gap-2 text-green-700">
+                    <Sparkles className="w-5 h-5" />
+                    <span className="font-medium">Entry saved successfully!</span>
+                  </div>
+                  <p className="text-green-600 text-sm">
+                    Your journal entry has been saved and your progress has been updated.
+                  </p>
+                  <Button
+                    onClick={() => {
+                      setShowSuccessMessage(false);
+                      navigate('/progress');
+                    }}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <TrendingUp className="w-4 h-4 mr-2" />
+                    View My Progress
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Tips Card */}
           <Card className="shadow-card-soft mt-6 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
