@@ -17,12 +17,12 @@ async def add_goal(goal: goal_create):
         return {"goal_id": goal_id, "message": "Goal created successfully!"}
     return {"message": "Failed to create goal."}
 
-@router.get("/goals/")
+@router.get("/")
 async def list_goals():
     goals = await get_goal()
     return {"goals": goals}
 
-@router.put("/goals/{goal_id}/subtask/")
+@router.put("/{goal_id}/subtask/")
 async def modify_subtask(goal_id: str, subtask_update: SubTaskUpdate):
     # Unpack the new return value: (success: bool, message: str)
     success, message = await update_subtask_status(goal_id, subtask_update)
@@ -33,14 +33,14 @@ async def modify_subtask(goal_id: str, subtask_update: SubTaskUpdate):
     # If failed, return the error message
     return {"message": message if not success and message != "Failed to update subtask." else "Failed to update subtask or goal progress. Check goal_id and index."}
 
-@router.put("/goals/{goal_id}")
+@router.put("/{goal_id}")
 async def modify_goal(goal_id: str, updated_data: dict):
     success = await update_goal(db, goal_id, updated_data)
     if success:
         return {"message": "Goal updated successfully!"}
     return {"message": "Failed to update goal."}
 
-@router.delete("/goals/{goal_id}")
+@router.delete("/{goal_id}")
 async def remove_goal(goal_id: str):
     success = await delete_goal(db, goal_id)
     if success:
