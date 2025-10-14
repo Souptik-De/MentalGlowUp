@@ -22,7 +22,7 @@ const Navigation = () => {
               <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
                 <Heart className="w-5 h-5 text-primary-foreground" fill="currentColor" />
               </div>
-              <span className="text-xl font-semibold text-foreground">MindfulMe</span>
+              <span className="text-xl font-semibold text-foreground">MentalGlowUp</span>
             </div>
 
             {/* Nav Items */}
@@ -54,7 +54,7 @@ const Navigation = () => {
             <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
               <Heart className="w-4 h-4 text-primary-foreground" fill="currentColor" />
             </div>
-            <span className="text-base sm:text-lg font-semibold text-foreground truncate">MindfulMe</span>
+            <span className="text-base sm:text-lg font-semibold text-foreground truncate">MentalGlowUp</span>
           </div>
 
           {/* Home Button */}

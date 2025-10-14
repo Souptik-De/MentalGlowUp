@@ -15,7 +15,7 @@ const QuoteDisplay = () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'MindfulMe Quote',
+          title: 'MentalGlowUp Quote',
           text: quote,
         });
       } catch (error) {
