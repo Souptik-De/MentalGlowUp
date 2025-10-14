@@ -1,6 +1,6 @@
 {
-  "name": "MindfulMe - Mood Tracker",
-  "short_name": "MindfulMe",
+  "name": "MentalGlowUp - Mood Tracker",
+  "short_name": "MentalGlowUp",
   "description": "Track your mood and mental wellness",
   "start_url": "/",
   "display": "standalone",

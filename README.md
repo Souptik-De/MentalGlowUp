@@ -1,0 +1,1 @@
+This is a mental wellness platform , not a replacement for medical help
