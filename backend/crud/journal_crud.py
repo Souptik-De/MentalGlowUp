@@ -163,12 +163,13 @@ async def get_user_progress(user_id: str, limit: int):
     
     series = []
     for item in items:
-        emotion_items = dicts_to_emotion_items(item.get("top_emotions", []))
+        emotion_dicts = item.get("top_emotions", [])
+        emotion_items = dicts_to_emotion_items(emotion_dicts)
         series.append({
             "timestamp": item["timestamp"].isoformat(),
             "weighted_mood": item["weighted_mood"],
             "emoji": item["emoji"],
-            "top_emotions": emotion_items,
+            "top_emotions": emotion_dicts,  # Return as dicts for JSON serialization
             "mood_decline": item.get("mood_decline", False),
             "z_score": item.get("z_score", 0.0),
             "cusum": item.get("cusum", 0.0),

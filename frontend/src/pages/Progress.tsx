@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { TrendingUp, Calendar, Heart, Zap } from 'lucide-react';
 import { api } from '@/services/api';
-
-// Helper function to calculate stats from progress data
 const calculateStats = (series: any[]) => {
   if (!series || series.length === 0) {
     return [
@@ -88,30 +87,42 @@ const Progress = () => {
   const [progressData, setProgressData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const fetchProgress = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      // For now, use a placeholder user_id - this should come from auth context
+      const data = await api.getUserProgress('user123');
+      console.log('Progress API Response:', data); // Debug: Log the full response
+      if (data && data.series && data.series.length > 0) {
+        console.log('Last entry top_emotions:', data.series[data.series.length - 1].top_emotions); // Debug: Check last entry emotions
+      }
+      setProgressData(data);
+    } catch (err) {
+      setError('Failed to load progress data');
+      console.error('Error fetching progress:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProgress = async () => {
-      try {
-        setLoading(true);
-        // For now, use a placeholder user_id - this should come from auth context
-        const data = await api.getUserProgress('user123');
-        setProgressData(data);
-      } catch (err) {
-        setError('Failed to load progress data');
-        console.error('Error fetching progress:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     // Check if we need to refresh (e.g., after a journal entry)
     const lastRefresh = sessionStorage.getItem('lastJournalEntry');
     if (lastRefresh) {
       sessionStorage.removeItem('lastJournalEntry'); // Clear the flag
+      console.log('Detected journal entry flag, refreshing data...'); // Debug: Confirm refresh trigger
     }
 
     fetchProgress();
-  }, []);
+  }, [refreshTrigger]);
+
+  // Function to manually refresh data (for debugging)
+  const handleRefresh = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   // Calculate stats from real data
   const stats = progressData ? calculateStats(progressData.series) : [
@@ -160,6 +171,9 @@ const Progress = () => {
           <div className="mb-8">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">Your Progress</h1>
             <p className="text-muted-foreground text-lg">Track your emotional wellness journey</p>
+            <Button onClick={handleRefresh} variant="outline" size="sm" className="mt-2">
+              Refresh Data
+            </Button>
           </div>
 
           {/* Stats Grid */}
@@ -176,23 +190,6 @@ const Progress = () => {
               </Card>
             ))}
           </div>
-
-          {/* Mood Chart Placeholder */}
-          <Card className="shadow-card-soft">
-            <CardHeader>
-              <CardTitle>Mood Over Time</CardTitle>
-              <CardDescription>Your emotional patterns this month</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64 flex items-center justify-center bg-muted rounded-lg">
-                <div className="text-center text-muted-foreground">
-                  <TrendingUp className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>Chart visualization coming soon</p>
-                  <p className="text-sm mt-1">Track your mood patterns over time</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Weekly Summary */}
           <Card className="shadow-card-soft mt-6">
